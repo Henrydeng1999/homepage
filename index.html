@@ -41,9 +41,9 @@
     footer { padding:26px 18px; text-align:center; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
     @media(max-width:760px) { .dashboard{grid-template-columns:1fr;} .hero{padding:45px 0 95px;} .links{gap:11px;} .links a{font-size:13px;} }
   </style>
-<link rel="stylesheet" href="styles.css"></head>
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="header.css"></head>
 <body>
-  <header><nav><div class="brand"><span>一〇七杯</span> · 主页</div><div class="links"><a href="index.html" aria-current="page">主页</a><a href="topics.html">推荐命题</a><a href="ssh.html">SSH 指南</a><a href="docs.html">使用说明</a><a href="iwan.html">iWAN 校园网</a><a href="qa.html">大赛 Q&amp;A</a></div></nav></header>
+  <header class="site-header"><nav class="site-nav" aria-label="主导航"><a class="site-brand" href="index.html">一〇七杯</a><div class="site-links"><a href="index.html">主页</a><a href="topics.html">推荐命题</a><a href="ssh.html">SSH 指南</a><a href="docs.html">使用说明</a><a href="iwan.html">iWAN 校园网</a><a href="qa.html">大赛 Q&amp;A</a></div></nav></header>
   <section class="hero"><div class="hero-inner"><p class="date" id="today"></p><h1>会议议程与<br>长期参考资料</h1><p class="lead">主页用于查看当前会议议程；命题、平台接入、网络、协作和比赛问答等内容作为长期参考资料持续保留。</p></div></section>
   <main>
     <div class="dashboard">

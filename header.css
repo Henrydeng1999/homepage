@@ -1,0 +1,92 @@
+body { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+
+.site-header {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #141413 !important;
+  border-bottom: 1px solid rgba(250, 249, 245, .14) !important;
+}
+
+.site-nav {
+  width: min(1120px, calc(100% - 36px)) !important;
+  min-height: 64px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 28px !important;
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif !important;
+}
+
+.site-brand {
+  flex: 0 0 auto !important;
+  color: #d97757 !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  letter-spacing: 0 !important;
+}
+
+.site-links {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.site-links a {
+  color: #faf9f5 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+}
+
+.site-links a:hover,
+.site-links a:focus-visible { color: #d97757 !important; }
+
+.hero {
+  width: 100% !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 64px 0 82px !important;
+  background: #141413 !important;
+}
+
+.hero > div,
+.hero-inner {
+  width: min(1120px, calc(100% - 36px)) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+.hero h1 {
+  margin: 0 !important;
+  color: #faf9f5 !important;
+  font-size: clamp(40px, 6vw, 68px) !important;
+  font-weight: 700 !important;
+  line-height: 1.12 !important;
+  letter-spacing: 0 !important;
+}
+
+.hero p { max-width: 720px !important; color: #e9ded6 !important; }
+
+body > article {
+  width: min(980px, calc(100% - 36px)) !important;
+  margin: 18px auto !important;
+}
+
+@media (max-width: 760px) {
+  .site-nav { min-height: auto !important; padding: 16px 0 !important; align-items: flex-start !important; flex-direction: column !important; gap: 14px !important; }
+  .site-links { width: 100% !important; justify-content: flex-start !important; gap: 12px 18px !important; flex-wrap: wrap !important; }
+  .hero { padding: 44px 0 62px !important; }
+  .hero h1 { font-size: 40px !important; }
+}
