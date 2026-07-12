@@ -41,9 +41,9 @@
     footer { padding:26px 18px; text-align:center; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
     @media(max-width:760px) { .dashboard{grid-template-columns:1fr;} .hero{padding:45px 0 95px;} .links{gap:11px;} .links a{font-size:13px;} }
   </style>
-</head>
+<link rel="stylesheet" href="styles.css"></head>
 <body>
-  <header><nav><div class="brand"><span>一〇七杯</span> · 团队资料站</div><div class="links"><a href="index.html" aria-current="page">主页</a><a href="topics.html">推荐命题</a><a href="ssh.html">SSH 指南</a><a href="docs.html">使用文档</a></div><a href="qa.html">大赛 Q&A</a></div></nav></header>
+  <header><nav><div class="brand"><span>一〇七杯</span> · </div><div class="links"><a href="index.html" aria-current="page">主页</a><a href="topics.html">推荐命题</a><a href="ssh.html">SSH 指南</a><a href="docs.html">使用文档</a></div><a href="qa.html">大赛 Q&A</a></div></nav></header>
   <section class="hero"><div class="hero-inner"><p class="date" id="today"></p><h1>今天，从清楚<br>下一步开始。</h1><p class="lead">集中查看参赛选题、平台接入资料和当天任务。页面内容面向团队内部快速查阅。</p></div></section>
   <main>
     <div class="dashboard">
@@ -65,7 +65,7 @@
     </div>
     <div class="tip">本网站仅提供团队参考资料，不记录操作数据。具体分工、进度和提交安排请以团队内部沟通为准。</div>
   </main>
-  <footer>“一〇七杯”算力与智能体开发大赛 · 团队资料站</footer>
+  <footer>“一〇七杯”算力与智能体开发大赛 · </footer>
   <script>
     const today = new Intl.DateTimeFormat('zh-CN', { timeZone:'Asia/Shanghai', year:'numeric', month:'long', day:'numeric', weekday:'long' }).format(new Date());
     document.querySelector('#today').textContent = today;
