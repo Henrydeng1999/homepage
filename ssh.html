@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="本科生算力平台 SSH 密钥与动态验证码配置指南">
+  <title>SSH 接入指南｜一〇七杯团队资料站</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #15231c;
+      --muted: #5d6a63;
+      --paper: #f5f7f2;
+      --surface: #ffffff;
+      --line: #d9dfd9;
+      --green: #176b47;
+      --green-dark: #0d4b31;
+      --lime: #d8f064;
+      --amber: #f5bd45;
+      --blue: #4285c5;
+      --red: #d65a4a;
+      --shadow: 0 12px 30px rgba(28, 54, 40, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      line-height: 1.7;
+    }
+
+    button, input { font: inherit; }
+
+    button { cursor: pointer; }
+
+    .topbar {
+      border-bottom: 1px solid rgba(255,255,255,.2);
+      background: var(--green-dark);
+      color: white;
+    }
+
+    .nav {
+      width: min(1180px, calc(100% - 40px));
+      min-height: 64px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand { font-size: 17px; font-weight: 700; }
+    .brand span { color: var(--lime); }
+
+    .nav-note { color: #cbd9d1; font-size: 14px; }
+
+    .hero {
+      background: var(--green-dark);
+      color: white;
+      padding: 70px 0 92px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "107";
+      position: absolute;
+      right: max(4vw, 28px);
+      bottom: -95px;
+      color: rgba(255,255,255,.045);
+      font: 800 280px/1 Arial, sans-serif;
+      letter-spacing: 0;
+      pointer-events: none;
+    }
+
+    .hero-inner, main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 15px;
+      color: var(--lime);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    h1 {
+      max-width: 780px;
+      margin: 0;
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .intro {
+      max-width: 700px;
+      margin: 24px 0 0;
+      color: #dbe5df;
+      font-size: 17px;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 34px;
+      margin-top: 38px;
+      color: #dbe5df;
+      font-size: 14px;
+    }
+
+    .stats strong { color: white; font-size: 22px; margin-right: 6px; }
+
+    main { padding: 0 0 72px; }
+
+    .toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 12px;
+      margin: -35px 0 44px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 12px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-wrap::before {
+      content: "⌕";
+      position: absolute;
+      left: 15px;
+      top: 7px;
+      color: var(--muted);
+      font-size: 22px;
+    }
+
+    #search {
+      width: 100%;
+      height: 44px;
+      padding: 0 15px 0 43px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      outline: none;
+      color: var(--ink);
+      background: #fafbf9;
+    }
+
+    #search:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23,107,71,.12); }
+
+    .filters { display: flex; gap: 7px; flex-wrap: wrap; }
+
+    .filter {
+      height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: white;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .filter:hover, .filter.active {
+      border-color: var(--green);
+      background: var(--green);
+      color: white;
+    }
+
+    .section { margin-bottom: 48px; scroll-margin-top: 100px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .section-heading h2 { margin: 0; font-size: 25px; line-height: 1.3; }
+    .section-heading p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .topic {
+      min-height: 245px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--accent, var(--green));
+      border-radius: 6px;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .topic:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .topic.hidden, .section.hidden { display: none; }
+
+    .topic-top { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+
+    .number {
+      color: var(--accent, var(--green));
+      font: 700 13px/1 Arial, sans-serif;
+    }
+
+    .topic h3 { margin: 13px 0 12px; font-size: 18px; line-height: 1.48; }
+    .topic p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .tag {
+      margin-top: auto;
+      padding-top: 18px;
+      color: var(--accent, var(--green));
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .platform { --accent: var(--green); }
+    .agent { --accent: var(--blue); }
+    .science { --accent: var(--amber); }
+    .innovation { --accent: var(--red); }
+
+    #empty {
+      display: none;
+      padding: 72px 20px;
+      text-align: center;
+      color: var(--muted);
+      background: white;
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+    }
+
+    .ssh-guide {
+      margin-top: 68px;
+      padding-top: 52px;
+      border-top: 1px solid var(--line);
+      scroll-margin-top: 100px;
+    }
+
+    .guide-title { max-width: 760px; margin-bottom: 30px; }
+    .guide-title .eyebrow { color: var(--green); }
+    .guide-title h2 { margin: 0 0 12px; font-size: clamp(30px, 4vw, 46px); line-height: 1.25; }
+    .guide-title p { margin: 0; color: var(--muted); }
+
+    .guide-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 34px; align-items: start; }
+
+    .guide-nav {
+      position: sticky;
+      top: 100px;
+      display: grid;
+      border-left: 2px solid var(--line);
+    }
+
+    .guide-nav a {
+      padding: 9px 14px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .guide-nav a:hover { color: var(--green); background: #edf4ef; }
+
+    .step { margin-bottom: 38px; padding: 26px; background: white; border: 1px solid var(--line); border-radius: 6px; }
+    .step-head { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+    .step-index { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; border-radius: 50%; background: var(--green); color: white; font-weight: 700; }
+    .step h3 { margin: 2px 0 0; font-size: 21px; line-height: 1.45; }
+    .step h4 { margin: 24px 0 7px; font-size: 16px; }
+    .step p { margin: 8px 0; color: var(--muted); }
+
+    pre {
+      position: relative;
+      margin: 14px 0;
+      padding: 16px 48px 16px 17px;
+      overflow-x: auto;
+      border-radius: 5px;
+      background: #14251c;
+      color: #e7f3eb;
+      font: 14px/1.65 Consolas, "Courier New", monospace;
+    }
+
+    .copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      border: 1px solid #506459;
+      border-radius: 4px;
+      background: #20382b;
+      color: white;
+      line-height: 1;
+    }
+
+    .copy:hover { background: var(--green); }
+
+    .note, .warning {
+      margin: 16px 0;
+      padding: 13px 15px;
+      border-left: 4px solid var(--blue);
+      background: #eef6fb;
+      color: #314b5d;
+      font-size: 14px;
+    }
+
+    .warning { border-color: var(--amber); background: #fff8e6; color: #624d1d; }
+
+    .answers { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+    .answers li { padding: 11px 13px; background: #f4f6f3; border-left: 3px solid var(--green); color: var(--muted); font-size: 14px; }
+    .answers strong { color: var(--green-dark); }
+
+    footer {
+      padding: 28px 20px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar, .section[data-category], #empty { display: none !important; }
+    .ssh-guide { margin-top: 0; padding-top: 0; border-top: 0; }
+    main { padding-top: 52px; }
+    .page-links { display: flex; gap: 18px; }
+    .page-links a { color: #dbe5df; text-decoration: none; font-size: 14px; }
+    .page-links a:hover, .page-links a[aria-current="page"] { color: var(--lime); }
+
+    @media (max-width: 900px) {
+      .toolbar { position: static; grid-template-columns: 1fr; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero { padding-top: 54px; }
+      .guide-layout { grid-template-columns: 1fr; }
+      .guide-nav { position: static; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); background: white; }
+    }
+
+    @media (max-width: 620px) {
+      .nav { width: min(100% - 28px, 1180px); }
+      .nav-note { display: none; }
+      .hero-inner, main { width: min(100% - 28px, 1180px); }
+      .hero { padding: 46px 0 76px; }
+      h1 { font-size: 39px; }
+      .intro { font-size: 15px; }
+      .toolbar { margin-top: -25px; top: 0; }
+      .filters { display: grid; grid-template-columns: repeat(2, 1fr); }
+      .filter { padding: 0 8px; }
+      .grid { grid-template-columns: 1fr; }
+      .topic { min-height: 220px; }
+      .section-heading { align-items: start; flex-direction: column; gap: 4px; }
+      .guide-nav { grid-template-columns: 1fr; }
+      .step { padding: 20px 17px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="nav" aria-label="主导航">
+      <div class="brand"><span>一〇七杯</span> · 算力与智能体开发大赛</div>
+      <div class="page-links"><a href="index.html">主页</a><a href="topics.html">推荐命题</a><a href="ssh.html" aria-current="page">SSH 指南</a></div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">CLUSTER ACCESS · TEAM GUIDE</p>
+      <h1>SSH 接入<br>操作指南</h1>
+      <p class="intro">完成密钥、公钥和动态验证码配置，通过终端安全访问本科生算力平台。</p>
+      <div class="stats" aria-label="命题统计">
+        <span><strong>4</strong>个步骤</span>
+        <span><strong>6</strong>组命令</span>
+        <span><strong>2FA</strong>动态验证</span>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <div class="toolbar" aria-label="命题筛选工具">
+      <label class="search-wrap">
+        <span hidden>搜索命题</span>
+        <input id="search" type="search" placeholder="搜索题目、技术方向或应用场景……" autocomplete="off">
+      </label>
+      <div class="filters" role="group" aria-label="按类别筛选">
+        <button class="filter active" data-filter="all">全部</button>
+        <button class="filter" data-filter="platform">平台工具</button>
+        <button class="filter" data-filter="agent">智能体开发</button>
+        <button class="filter" data-filter="science">学科应用</button>
+        <button class="filter" data-filter="innovation">综合创新</button>
+      </div>
+    </div>
+
+    <section class="section platform" data-category="platform" id="platform">
+      <div class="section-heading">
+        <h2>平台工具类</h2>
+        <p>降低算力平台的使用与数据管理门槛</p>
+      </div>
+      <div class="grid">
+        <article class="topic" data-id="platform-1">
+          <div class="topic-top"><span class="number">01</span></div>
+          <h3>作业模板市场与一键运行工具</h3>
+          <p>基于 Web 提供常见作业模板，如机器学习训练、数值计算、第一性原理计算、分子动力学模拟等，支持参数填写、脚本生成和一键提交。</p>
+          <span class="tag">WEB · 模板 · 自动化</span>
+        </article>
+        <article class="topic" data-id="platform-2">
+          <div class="topic-top"><span class="number">02</span></div>
+          <h3>算力平台作业管理与可视化 Dashboard</h3>
+          <p>面向学生提供作业提交、状态查看、日志显示、作业克隆、资源使用统计等功能，降低平台使用门槛。</p>
+          <span class="tag">DASHBOARD · 日志 · 资源统计</span>
+        </article>
+        <article class="topic" data-id="platform-3">
+          <div class="topic-top"><span class="number">03</span></div>
+          <h3>文件管理与数据传输辅助工具</h3>
+          <p>支持文件搜索、打包解压、批量上传下载、自动压缩传输等功能，提升大文件和实验数据管理效率。</p>
+          <span class="tag">文件管理 · 数据传输 · 压缩</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section agent" data-category="agent" id="agent">
+      <div class="section-heading">
+        <h2>智能体开发类</h2>
+        <p>让智能体参与答疑、诊断与教学辅助</p>
+      </div>
+      <div class="grid">
+        <article class="topic" data-id="agent-1">
+          <div class="topic-top"><span class="number">04</span></div>
+          <h3>算力平台答疑与作业脚本生成智能体</h3>
+          <p>面向初学者提供平台使用问答、Slurm 命令解释、作业脚本生成、常见报错诊断等服务。</p>
+          <span class="tag">智能问答 · SLURM · 脚本生成</span>
+        </article>
+        <article class="topic" data-id="agent-2">
+          <div class="topic-top"><span class="number">05</span></div>
+          <h3>课程实验辅助与作业批改智能体</h3>
+          <p>面向课程实验场景，提供实验指导、代码运行检查、日志分析、结果初步评价和批改辅助。</p>
+          <span class="tag">课程实验 · 代码检查 · 智能批改</span>
+        </article>
+        <article class="topic" data-id="agent-3">
+          <div class="topic-top"><span class="number">06</span></div>
+          <h3>作业运行异常检测与优化建议智能体</h3>
+          <p>自动分析作业日志和资源使用情况，识别 OOM、依赖错误、资源浪费、运行效率低等问题，并给出优化建议。</p>
+          <span class="tag">异常检测 · OOM · 性能优化</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section science" data-category="science" id="science">
+      <div class="section-heading">
+        <h2>学科应用类</h2>
+        <p>以算力支撑跨学科研究与教学实践</p>
+      </div>
+      <div class="grid">
+        <article class="topic" data-id="science-1">
+          <div class="topic-top"><span class="number">07</span></div>
+          <h3>基于本科生算力平台的学科创新应用案例</h3>
+          <p>面向物理、数学、化学、生物、医学等方向，基于平台完成研究或实践项目案例，展示平台对学科创新的支撑作用。</p>
+          <span class="tag">跨学科 · 科研实践 · 应用案例</span>
+        </article>
+        <article class="topic" data-id="science-2">
+          <div class="topic-top"><span class="number">08</span></div>
+          <h3>面向科学计算的课程实验迁移与加速实践</h3>
+          <p>将数值计算、分子模拟、第一性原理计算、机器学习等课程实验迁移至算力平台，形成可复用教学案例。</p>
+          <span class="tag">科学计算 · 实验迁移 · 加速</span>
+        </article>
+        <article class="topic" data-id="science-3">
+          <div class="topic-top"><span class="number">09</span></div>
+          <h3>基于平台的 AI for Science 实践应用</h3>
+          <p>利用平台开展材料性质预测、分子结构分析、图像识别、实验数据分析等 AI for Science 应用。</p>
+          <span class="tag">AI4SCIENCE · 预测 · 数据分析</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section innovation" data-category="innovation" id="innovation">
+      <div class="section-heading">
+        <h2>综合创新类</h2>
+        <p>探索统一工作流、运维预警与高可靠机制</p>
+      </div>
+      <div class="grid">
+        <article class="topic" data-id="innovation-1">
+          <div class="topic-top"><span class="number">10</span></div>
+          <h3>面向“课程、科研、竞赛”的统一实验工作流</h3>
+          <p>构建从环境配置、数据准备、作业提交、日志查看、结果保存到报告生成的一体化实验流程。</p>
+          <span class="tag">工作流 · 一体化 · 报告生成</span>
+        </article>
+        <article class="topic" data-id="innovation-2">
+          <div class="topic-top"><span class="number">11</span></div>
+          <h3>算力平台资源使用画像与维护预警系统</h3>
+          <p>分析作业排队、节点负载、GPU/CPU 利用率、异常作业、节点高温或宕机等情况，提供可视化预警和通知。</p>
+          <span class="tag">资源画像 · 监控 · 可视化预警</span>
+        </article>
+        <article class="topic" data-id="innovation-3">
+          <div class="topic-top"><span class="number">12</span></div>
+          <h3>面向高可靠运行的作业增强机制</h3>
+          <p>探索断点续算、作业副本热备、失败自动重试、排队时间预测、资源碎片整理等功能，提高作业运行稳定性和资源利用效率。</p>
+          <span class="tag">高可靠 · 自动重试 · 资源调度</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="ssh-guide" id="ssh-guide">
+      <div class="guide-title">
+        <p class="eyebrow">CLUSTER ACCESS GUIDE</p>
+        <h2>SSH 权限开放参考操作</h2>
+        <p>配置 SSH 密钥和动态验证码后，可以通过终端安全访问本科生算力平台。请依次完成以下步骤。</p>
+      </div>
+
+      <div class="guide-layout">
+        <nav class="guide-nav" aria-label="SSH 配置步骤">
+          <a href="#ssh-key">01 配置 SSH 密钥</a>
+          <a href="#ssh-cluster">02 添加集群公钥</a>
+          <a href="#ssh-2fa">03 配置动态验证码</a>
+          <a href="#ssh-login">04 登录集群</a>
+        </nav>
+
+        <div>
+          <article class="step" id="ssh-key">
+            <div class="step-head"><span class="step-index">1</span><h3>在自己的电脑上生成 SSH 密钥</h3></div>
+            <p>Windows 用户打开 PowerShell 或 Git Bash；macOS、Linux 用户打开终端。将邮箱替换成自己的邮箱后运行：</p>
+            <pre><code>ssh-keygen -t ed25519 -C "your_email@example.com"</code><button class="copy" type="button" title="复制命令" aria-label="复制 SSH 密钥生成命令">▣</button></pre>
+            <p>系统会询问密钥保存位置和私钥密码（passphrase）。建议为私钥设置一个短密码，其余项目可按回车接受默认值。</p>
+            <div class="warning"><strong>妥善保管私钥：</strong><code>id_ed25519</code> 是私钥，绝不能泄露；<code>id_ed25519.pub</code> 是公钥，需要添加到集群。</div>
+            <p>macOS 或 Linux 用户可以运行下面的命令查看并复制公钥全部内容：</p>
+            <pre><code>cat ~/.ssh/id_ed25519.pub</code><button class="copy" type="button" title="复制命令" aria-label="复制查看公钥命令">▣</button></pre>
+          </article>
+
+          <article class="step" id="ssh-cluster">
+            <div class="step-head"><span class="step-index">2</span><h3>将公钥添加到集群账户</h3></div>
+            <p>在校园网环境下访问 <a href="https://107.ustc.edu.cn" target="_blank" rel="noopener">本科生算力平台</a>，使用现有密码登录并选择“登录集群”。</p>
+            <h4>创建 SSH 配置目录并设置权限</h4>
+            <pre><code>mkdir -p ~/.ssh
+chmod 700 ~/.ssh</code><button class="copy" type="button" title="复制命令" aria-label="复制创建 SSH 目录命令">▣</button></pre>
+            <p><code>-p</code> 表示按需创建目录；目录已存在时不会报错。</p>
+            <h4>追加公钥并设置文件权限</h4>
+            <pre><code>echo "这里替换成您自己的公钥全部内容" &gt;&gt; ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys</code><button class="copy" type="button" title="复制命令" aria-label="复制添加公钥命令">▣</button></pre>
+            <div class="note">复制 <code>id_ed25519.pub</code> 中的一整行内容，包括开头的 <code>ssh-ed25519</code> 和末尾的邮箱。命令中的两个大于号 <code>&gt;&gt;</code> 表示追加，不会覆盖已有密钥。</div>
+          </article>
+
+          <article class="step" id="ssh-2fa">
+            <div class="step-head"><span class="step-index">3</span><h3>配置身份验证器与动态验证码</h3></div>
+            <p>在手机上安装身份验证器应用，例如 Microsoft Authenticator、Google Authenticator、FreeOTP 或腾讯身份验证器。然后在集群命令行运行：</p>
+            <pre><code>google-authenticator</code><button class="copy" type="button" title="复制命令" aria-label="复制身份验证器命令">▣</button></pre>
+            <p>终端会显示二维码、Secret Key 和 Emergency Scratch Codes。立即使用身份验证器扫描二维码，或手动输入密钥。</p>
+            <div class="warning"><strong>保存备用安全码：</strong>请将 Emergency Scratch Codes 离线保存在安全位置。手机丢失或应用不可用时可用其登录，每个备用码只能使用一次。</div>
+            <h4>配置问题建议选择</h4>
+            <ul class="answers">
+              <li>基于时间生成令牌（time-based）：<strong>y</strong></li>
+              <li>更新配置文件：<strong>y</strong></li>
+              <li>禁止同一令牌多次使用：<strong>y</strong></li>
+              <li>放宽时间容错范围：<strong>n</strong></li>
+              <li>限制尝试次数：<strong>y</strong></li>
+            </ul>
+          </article>
+
+          <article class="step" id="ssh-login">
+            <div class="step-head"><span class="step-index">4</span><h3>通过 SSH 登录集群</h3></div>
+            <p>完成配置后，在本机终端使用域名或 IP 地址连接。默认端口为 22：</p>
+            <pre><code>ssh 用户名@107.ustc.edu.cn
+# 或
+ssh 用户名@114.214.255.132</code><button class="copy" type="button" title="复制命令" aria-label="复制 SSH 登录命令">▣</button></pre>
+            <p>用户名可在网页端集群信息中查看，通常是小写学号。登录时系统会要求输入私钥密码和手机身份验证器显示的 6 位动态验证码。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <div id="empty">没有找到符合条件的命题，请尝试其他关键词或分类。</div>
+  </main>
+
+  <footer>团队资料站 · 本科生算力平台 SSH 接入指南</footer>
+
+  <script>
+    const topics = [...document.querySelectorAll('.topic')];
+    const sections = [...document.querySelectorAll('.section')];
+    const filters = [...document.querySelectorAll('.filter')];
+    const search = document.querySelector('#search');
+    const empty = document.querySelector('#empty');
+    let activeFilter = 'all';
+
+    function applyFilters() {
+      const query = search.value.trim().toLocaleLowerCase('zh-CN');
+      let visibleCount = 0;
+
+      topics.forEach(topic => {
+        const category = topic.closest('.section').dataset.category;
+        const categoryMatch = activeFilter === 'all' || category === activeFilter;
+        const textMatch = !query || topic.textContent.toLocaleLowerCase('zh-CN').includes(query);
+        const visible = categoryMatch && textMatch;
+        topic.classList.toggle('hidden', !visible);
+        if (visible) visibleCount += 1;
+      });
+
+      sections.forEach(section => {
+        section.classList.toggle('hidden', !section.querySelector('.topic:not(.hidden)'));
+      });
+      empty.style.display = visibleCount ? 'none' : 'block';
+    }
+
+    filters.forEach(button => {
+      button.addEventListener('click', () => {
+        activeFilter = button.dataset.filter;
+        filters.forEach(item => item.classList.toggle('active', item === button));
+        applyFilters();
+      });
+    });
+
+    search.addEventListener('input', applyFilters);
+    document.querySelectorAll('.copy').forEach(button => {
+      button.addEventListener('click', async () => {
+        const code = button.parentElement.querySelector('code').textContent;
+        try {
+          await navigator.clipboard.writeText(code);
+          const original = button.textContent;
+          button.textContent = '✓';
+          setTimeout(() => { button.textContent = original; }, 1200);
+        } catch {
+          button.title = '复制失败，请手动选择命令';
+        }
+      });
+    });
+    applyFilters();
+  </script>
+</body>
+</html>
